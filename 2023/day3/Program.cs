@@ -4,7 +4,10 @@ var input = File.ReadAllLines("./input.txt");
 
 List<Point> specialTiles = new();
 Regex isSpecial = new Regex(@"[^\d. \n]");
+Regex isGear= new Regex(@"[*]");
 Regex numbers = new Regex(@"\d{1,}");
+
+Dictionary<Point, List<int>> gearPos = new();
 
 for (int line = 0; line < input.Length; line++)
 {
@@ -15,20 +18,24 @@ for (int line = 0; line < input.Length; line++)
         {
             specialTiles.Add(new (tile, line));
         }
+        if (isGear.IsMatch(symbol))
+        {
+            gearPos.Add(new(tile, line),new List<int>());
+        }
     }
 }
 int total = 0;
 for (int line = 0; line < input.Length; line++)
 {
     var matches = numbers.Matches(input[line]);
-    var temp = matches.Where(match => IsClose(specialTiles, match, line)).ToList();
+    var temp = matches.Where(match => IsClose(specialTiles, match, line, gearPos)).ToList();
     total += temp.Sum(x => int.Parse(x.Value));
 
 }
 
 Console.WriteLine(total);
-
-bool IsClose(List<Point> points, Match match, int line)
+Console.WriteLine(gearPos.Where(x=>x.Value.Count == 2).Select(x => x.Value[0] * x.Value[1]).Sum());
+bool IsClose(List<Point> points, Match match, int line,Dictionary<Point,List<int>> gears)
 {
     var xRange = Enumerable.Range(match.Index - 1,  match.Length + 2);
     var yRange = Enumerable.Range(line - 1, 3);
@@ -38,6 +45,10 @@ bool IsClose(List<Point> points, Match match, int line)
         {
             if(points.Any(a=>a.x == xNum && a.y == yNum))
             {
+                if(gearPos.ContainsKey(new Point(xNum, yNum)))
+                {
+                    gearPos[new Point(xNum, yNum)].Add(int.Parse(match.Value));
+                }
                 return true;
             }
         }
