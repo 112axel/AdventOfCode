@@ -1,15 +1,18 @@
 ﻿using System.Text.RegularExpressions;
 
-var input = File.ReadAllText("./input.txt");
+var input = File.ReadAllLines("./input.txt");
 
+var fullLine = string.Concat(input);
 
 
 Regex regex = new Regex(@"mul\((\d+),(\d+)\)");
 
-Regex removeDont = new Regex(@"don't\(\).+?do\(\)");
+Regex removeDont = new Regex(@"don't\(\).+?(?:do\(\)|$)");
 
 
-var a = regex.Matches(input);
+var b = removeDont.Replace(fullLine,"");
+
+var a = regex.Matches(b);
 
 
 int result = 0;
